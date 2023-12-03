@@ -23,9 +23,10 @@ class RealTimeDataManager:
     def __init__(self):
         self.data = {"temperatura": 25.0, "humedad": 60.0}
         self.event_manager = EventManager()
+        self.finaliza = False # Booleano para finalizar la ejecución.
 
     def start_real_time_updates(self):
-        while True:
+        while not self.finaliza: # Se modificó el while para que termine cuando el usuario decida.
             time.sleep(3)
             self.generate_real_time_data()
             self.event_manager.notify("cambios", self.data) # El RealTimeDataManager utiliza el método de notificar del EventManager.
@@ -45,10 +46,12 @@ admin_eventos.event_manager.subscribe("cambios", cambios_temp_humedad)
 # Actualizaciones en tiempo real en segundo plano
 import threading
 update_thread = threading.Thread(target=admin_eventos.start_real_time_updates)
+update_thread.daemon = True
 update_thread.start()
 
 try:
     while True:
         time.sleep(1)
 except KeyboardInterrupt:
+    admin_eventos.finaliza = True
     print("\nPrograma terminado.")
